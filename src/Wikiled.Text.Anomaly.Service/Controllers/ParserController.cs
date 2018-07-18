@@ -1,104 +1,75 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
 using Wikiled.MachineLearning.Mathematics;
 using Wikiled.Server.Core.ActionFilters;
-using Wikiled.Server.Core.Helpers;
+using Wikiled.Server.Core.Controllers;
 using Wikiled.Text.Anomaly.Api.Data;
 using Wikiled.Text.Anomaly.Service.Logic;
+using Wikiled.Text.Parser.Api.Service;
 
 namespace Wikiled.Text.Anomaly.Service.Controllers
 {
     [Route("api/[controller]")]
     [TypeFilter(typeof(RequestValidationAttribute))]
-    public class ParserController : Controller
+    public class ParserController : BaseController
     {
-        private readonly ILogger<ParserController> logger;
-
-        private readonly IIpResolve resolve;
-
         private readonly IAnomalyDetectionLogic anomalyDetection;
 
-        public ParserController(ILogger<ParserController> logger, IIpResolve resolve, IAnomalyDetectionLogic anomalyDetection)
-        {
-            this.resolve = resolve ?? throw new ArgumentNullException(nameof(resolve));
-            this.anomalyDetection = anomalyDetection ?? throw new ArgumentNullException(nameof(anomalyDetection));
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
+        private readonly IDocumentParser documentParser;
 
-        [Route("version")]
-        [HttpGet]
-        public string ServerVersion()
+        public ParserController(ILoggerFactory loggerFactory,
+            IAnomalyDetectionLogic anomalyDetection,
+            IDocumentParser documentParser)
+            : base(loggerFactory)
         {
-            var version = $"Version: [{Assembly.GetExecutingAssembly().GetName().Version}]";
-            logger.LogInformation("Version request: {0}", version);
-            return version;
+            this.anomalyDetection = anomalyDetection ?? throw new ArgumentNullException(nameof(anomalyDetection));
+            this.documentParser = documentParser;
         }
 
         [Route("process")]
         public async Task<AnomalyResult> Process(AnomalyRequest request)
         {
-            var result = await anomalyDetection.Parse(request.Text).ConfigureAwait(false);
-            var rating = RatingData.Accumulate(result.Sentences.Select(item => item.CalculateSentiment()));
-            return new AnomalyResult {Text = result.Text, Sentiment = rating.RawRating};
+            return await ProcessText(request.Text).ConfigureAwait(false);
         }
 
-        [HttpPost, DisableRequestSizeLimit]
-        [Route("processfile")]
-        public ActionResult<AnomalyResult> ProcessFile([ModelBinder(BinderType = typeof(JsonModelBinder))] AnomalyRequest request, IFormFile file)
+        private async Task<AnomalyResult> ProcessText(string text)
         {
-            logger.LogInformation("Processing File: {0}", resolve.GetRequestIp());
-            //if (file.Length > 0)
-            //{
-            //    var fileNameData = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName;
-            //    string fileName = fileNameData.Value;
-            //    string fullPath = GetFileName(fileName);
-            //    using (var stream = new FileStream(fullPath, FileMode.Create))
-            //    {
-            //        file.CopyTo(stream);
-            //    }
-
-            //    var fileInfo = new FileInfo(fullPath);
-            //    var parser = parserFactory.ConstructParsers(fileInfo);
-            //    var result = parser.Parse();
-            //    AnomalyResult parsingResult = new AnomalyResult();
-            //    parsingResult.Text = result;
-            //    parsingResult.FileLength = fileNameData.Length;
-            //    parsingResult.Name = fileInfo.Name;
-            //    return Ok(parsingResult);
-            //}
-
-            //return StatusCode(500, "Failed processing");
-            throw new NotImplementedException();
+            var result = await anomalyDetection.Parse(text).ConfigureAwait(false);
+            var rating = RatingData.Accumulate(result.Sentences.Select(item => item.CalculateSentiment()));
+            return new AnomalyResult { Text = result.Text, Sentiment = rating.RawRating };
         }
 
-        //private string GetFileName(string name)
-        //{
-        //    var path = config.Save;
-        //    if (!Path.IsPathRooted(path))
-        //    {
-        //        string webRootPath = hostingEnvironment.ContentRootPath;
-        //        path = Path.Combine(webRootPath, path);
-        //    }
+        [HttpPost]
+        [DisableRequestSizeLimit]
+        [Route("processfile")]
+        public async Task<ActionResult> ProcessFile([ModelBinder(BinderType = typeof(JsonModelBinder))]
+            AnomalyRequest request,
+            IFormFile file)
+        {
+            if (file.Length != 0)
+            {
+                return StatusCode(500, "Only single file supported");
+            }
 
-        //    path = Path.Combine(path, DateTime.Today.ToString("MMddyyyy"));
-        //    if (!Directory.Exists(path))
-        //    {
-        //        lock (syncRoot)
-        //        {
-        //            if (!Directory.Exists(path))
-        //            {
-        //                Directory.CreateDirectory(path);
-        //            }
-        //        }
-        //    }
+            var fileNameData = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName;
+            var fileName = fileNameData.Value;
+            byte[] fileBytes;
+            using (var ms = new MemoryStream())
+            {
+                await file.CopyToAsync(ms).ConfigureAwait(false);
+                fileBytes = ms.ToArray();
+            }
 
-        //    return Path.Combine(path, name);
-        //}
+            var parsingResult = await documentParser.Parse(fileName, fileBytes).ConfigureAwait(false);
+            var result = await ProcessText(parsingResult.Text).ConfigureAwait(false);
+            return Ok(result);
+        }
     }
 }

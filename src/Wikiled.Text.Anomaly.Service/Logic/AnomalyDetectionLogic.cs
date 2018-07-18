@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Wikiled.Text.Analysis.Structure;
 using Wikiled.Text.Anomaly.Processing;
-using Wikiled.Text.Parser.Api.Service;
 
 namespace Wikiled.Text.Anomaly.Service.Logic
 {
@@ -12,17 +11,19 @@ namespace Wikiled.Text.Anomaly.Service.Logic
     {
         private readonly ILogger<AnomalyDetectionLogic> logger;
 
-        private readonly IDocumentParser documentParser;
-
         private readonly IAnomalyFactory anomalyFactory;
 
         private readonly ISentimentAnalysisFactory sentimentAnalysisFactory;
 
-        public AnomalyDetectionLogic(ILoggerFactory logger, IDocumentParser documentParser, IAnomalyFactory anomalyFactory, ISentimentAnalysisFactory sentimentAnalysisFactory)
+        public AnomalyDetectionLogic(ILoggerFactory logger, IAnomalyFactory anomalyFactory, ISentimentAnalysisFactory sentimentAnalysisFactory)
         {
-            this.documentParser = documentParser ?? throw new ArgumentNullException(nameof(documentParser));
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+            
             this.anomalyFactory = anomalyFactory ?? throw new ArgumentNullException(nameof(anomalyFactory));
-            this.sentimentAnalysisFactory = sentimentAnalysisFactory;
+            this.sentimentAnalysisFactory = sentimentAnalysisFactory ?? throw new ArgumentNullException(nameof(sentimentAnalysisFactory));
             this.logger = logger.CreateLogger<AnomalyDetectionLogic>();
         }
 
