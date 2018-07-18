@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Wikiled.Text.Analysis.Structure;
+using Wikiled.Text.Anomaly.Api.Data;
 using Wikiled.Text.Anomaly.Processing;
 
 namespace Wikiled.Text.Anomaly.Service.Logic
@@ -27,13 +28,13 @@ namespace Wikiled.Text.Anomaly.Service.Logic
             this.logger = logger.CreateLogger<AnomalyDetectionLogic>();
         }
 
-        public async Task<Document> Parse(string text)
+        public async Task<Document> Parse(AnomalyRequest request)
         {
             logger.LogDebug("Parsing");
-            var document = await sentimentAnalysisFactory.Create("null").Measure(text, CancellationToken.None).ConfigureAwait(false);
+            var document = await sentimentAnalysisFactory.Create(request.Domain).Measure(request.Text, CancellationToken.None).ConfigureAwait(false);
             logger.LogDebug("Performing anomaly detection");
             var anomaly = anomalyFactory.CreateSimple(document);
-            var result = await Task.Run(() => anomaly.Detect()).ConfigureAwait(false);
+            var result = await Task.Run(() => anomaly.Detect(request.Filters)).ConfigureAwait(false);
             return result;
         }
     }

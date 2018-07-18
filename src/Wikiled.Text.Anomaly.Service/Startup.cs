@@ -113,11 +113,7 @@ namespace Wikiled.Text.Anomaly.Service
             logger.LogInformation("Setting up services...");
             var parsingUrl = new Uri(Configuration["Services:Parsing"]);
             logger.LogInformation("Register parsing: {0}", parsingUrl);
-            builder.Register(context => new DocumentParser(
-                    new HttpClient { Timeout = TimeSpan.FromMinutes(5) },
-                    parsingUrl,
-                    context.Resolve<ILoggerFactory>()))
-                .As<IDocumentParser>();
+            builder.Register(context => new DocumentParser(new ApiClientFactory(new HttpClient {Timeout = TimeSpan.FromMinutes(5)}, parsingUrl))).As<IDocumentParser>();
 
             var sentimentUrl = new Uri(Configuration["Services:Sentiment"]);
             builder.Register(context =>

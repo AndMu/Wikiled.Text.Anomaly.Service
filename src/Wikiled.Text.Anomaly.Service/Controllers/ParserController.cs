@@ -1,12 +1,9 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Logging;
-using Microsoft.Net.Http.Headers;
 using Wikiled.MachineLearning.Mathematics;
 using Wikiled.Server.Core.ActionFilters;
 using Wikiled.Server.Core.Controllers;
@@ -34,42 +31,18 @@ namespace Wikiled.Text.Anomaly.Service.Controllers
         }
 
         [Route("process")]
-        public async Task<AnomalyResult> Process(AnomalyRequest request)
+        [RequestSizeLimit(1024 * 1024 * 100)]
+        public async Task<AnomalyResult> Process([FromBody] AnomalyRequest request)
         {
-            return await ProcessText(request.Text).ConfigureAwait(false);
-        }
+            if (request.Data?.Length > 0)
+            {
+                var parsingResult = await documentParser.Parse(request.Name, request.Data, CancellationToken.None).ConfigureAwait(false);
+                request.Text = parsingResult.Text;
+            }
 
-        private async Task<AnomalyResult> ProcessText(string text)
-        {
-            var result = await anomalyDetection.Parse(text).ConfigureAwait(false);
+            var result = await anomalyDetection.Parse(request).ConfigureAwait(false);
             var rating = RatingData.Accumulate(result.Sentences.Select(item => item.CalculateSentiment()));
             return new AnomalyResult { Text = result.Text, Sentiment = rating.RawRating };
-        }
-
-        [HttpPost]
-        [DisableRequestSizeLimit]
-        [Route("processfile")]
-        public async Task<ActionResult> ProcessFile([ModelBinder(BinderType = typeof(JsonModelBinder))]
-            AnomalyRequest request,
-            IFormFile file)
-        {
-            if (file.Length != 0)
-            {
-                return StatusCode(500, "Only single file supported");
-            }
-
-            var fileNameData = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName;
-            var fileName = fileNameData.Value;
-            byte[] fileBytes;
-            using (var ms = new MemoryStream())
-            {
-                await file.CopyToAsync(ms).ConfigureAwait(false);
-                fileBytes = ms.ToArray();
-            }
-
-            var parsingResult = await documentParser.Parse(fileName, fileBytes).ConfigureAwait(false);
-            var result = await ProcessText(parsingResult.Text).ConfigureAwait(false);
-            return Ok(result);
         }
     }
 }
