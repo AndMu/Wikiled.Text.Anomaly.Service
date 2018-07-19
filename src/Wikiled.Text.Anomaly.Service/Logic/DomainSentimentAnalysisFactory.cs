@@ -18,7 +18,7 @@ namespace Wikiled.Text.Anomaly.Service.Logic
         public DomainSentimentAnalysisFactory(ILoggerFactory factory, IStreamApiClientFactory streamApiClientFactory)
         {
             this.streamApiClientFactory = streamApiClientFactory ?? throw new ArgumentNullException(nameof(streamApiClientFactory));
-            requestsTable.Add("market", new WorkRequest { Domain = "twitterMarket", CleanText = true });
+            requestsTable.Add("market", new WorkRequest { Domain = "Market", CleanText = false });
             logger = factory?.CreateLogger<DomainSentimentAnalysisFactory>() ??throw new ArgumentNullException(nameof(factory));
         }
 
