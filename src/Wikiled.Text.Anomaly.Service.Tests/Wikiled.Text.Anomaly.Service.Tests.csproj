@@ -36,8 +36,8 @@
     <PackageReference Include="Wikiled.Server.Core" Version="1.2.10" />
     <PackageReference Include="Wikiled.Common" Version="1.1.1" />
     <PackageReference Include="Wikiled.Server.Core.Testing" Version="1.2.10" />
-    <PackageReference Include="Wikiled.Text.Anomaly" Version="1.0.11" />
-    <PackageReference Include="Wikiled.Text.Parser.Api" Version="1.0.24" />
+    <PackageReference Include="Wikiled.Text.Anomaly" Version="1.0.25" />
+    <PackageReference Include="Wikiled.Text.Parser.Api" Version="1.0.27" />
   </ItemGroup>
 
   <ItemGroup>

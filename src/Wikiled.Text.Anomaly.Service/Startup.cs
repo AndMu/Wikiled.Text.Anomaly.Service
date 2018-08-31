@@ -1,6 +1,8 @@
 ﻿using System;
+using System.IO;
 using System.Net.Http;
 using System.Reflection;
+using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
@@ -9,14 +11,17 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Wikiled.Common.Net.Client;
+using Wikiled.Common.Utilities.Resources;
 using Wikiled.Server.Core.Errors;
 using Wikiled.Server.Core.Helpers;
 using Wikiled.Server.Core.Middleware;
 using Wikiled.Text.Analysis.NLP.Frequency;
 using Wikiled.Text.Analysis.NLP.NRC;
 using Wikiled.Text.Analysis.POS;
+using Wikiled.Text.Analysis.Word2Vec;
 using Wikiled.Text.Analysis.Words;
 using Wikiled.Text.Anomaly.Processing;
+using Wikiled.Text.Anomaly.Processing.Vectors;
 using Wikiled.Text.Anomaly.Service.Logic;
 using Wikiled.Text.Inquirer.Logic;
 using Wikiled.Text.Parser.Api.Service;
@@ -28,8 +33,15 @@ namespace Wikiled.Text.Anomaly.Service
     {
         private readonly ILogger<Startup> logger;
 
+        private ILoggerFactory loggerFactory;
+
         public Startup(ILoggerFactory loggerFactory, IHostingEnvironment env)
         {
+            if (loggerFactory == null)
+            {
+                throw new ArgumentNullException(nameof(loggerFactory));
+            }
+
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -37,6 +49,7 @@ namespace Wikiled.Text.Anomaly.Service
                 .AddEnvironmentVariables();
             Configuration = builder.Build();
             Env = env;
+            this.loggerFactory = loggerFactory;
             logger = loggerFactory.CreateLogger<Startup>();
             Configuration.ChangeNlog();
             logger.LogInformation($"Starting: {Assembly.GetExecutingAssembly().GetName().Version}");
@@ -141,6 +154,12 @@ namespace Wikiled.Text.Anomaly.Service
             builder.RegisterType<FrequencyListManager>().As<IFrequencyListManager>().SingleInstance();
             builder.RegisterType<StyleFactory>().As<IStyleFactory>();
             builder.RegisterType<AnomalyFactory>().As<IAnomalyFactory>();
+            builder.RegisterType<EmbeddingVectorSource>().As<IDocumentVectorSource>();
+            logger.LogInformation("Downloading model...");
+            var model = new Uri(Configuration["Anomaly:model"]);
+            new DataDownloader(loggerFactory).DownloadFile(model, "resources").Wait();
+            builder.Register(context => WordModel.Load("Resources/model.bin")).SingleInstance();
         }
+
     }
 }

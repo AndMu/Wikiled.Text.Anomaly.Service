@@ -43,7 +43,7 @@ namespace Wikiled.Text.Anomaly.Service.Tests.Acceptance
                         {
                             Domain = "Market",
 
-                            Filters = new[] {FilterTypes.KMeans}
+                            Filters = new[] {FilterTypes.Svm}
                         }
                 },
                 CancellationToken.None).ConfigureAwait(false);

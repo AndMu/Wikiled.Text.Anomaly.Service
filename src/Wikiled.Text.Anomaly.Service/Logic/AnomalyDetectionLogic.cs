@@ -12,6 +12,7 @@ using Wikiled.Text.Analysis.Structure;
 using Wikiled.Text.Analysis.Structure.Raw;
 using Wikiled.Text.Anomaly.Api.Data;
 using Wikiled.Text.Anomaly.Processing;
+using Wikiled.Text.Anomaly.Structure;
 
 namespace Wikiled.Text.Anomaly.Service.Logic
 {
@@ -50,13 +51,10 @@ namespace Wikiled.Text.Anomaly.Service.Logic
 
             var result = await sentimentAnalysisFactory.Create(requestHeader.Domain).Measure(requests, CancellationToken.None).ToArray();
             result = result.OrderBy(item => int.Parse(item.Id)).ToArray();
-            var textBlock = JsonConvert.SerializeObject(result, Formatting.Indented);
-            File.WriteAllText("docs.json", textBlock);
-            throw new NotImplementedException();
-            //logger.LogDebug("Performing anomaly detection");
-            //var anomaly = anomalyFactory.CreateSimple(document);
-            //var result = await Task.Run(() => anomaly.Detect(requestHeader.Filters)).ConfigureAwait(false);
-            //return result;
+            logger.LogDebug("Performing anomaly detection");
+            var anomaly = anomalyFactory.CreateSimple(new DocumentBlock(result));
+            var anomalyResult = await Task.Run(() => anomaly.Detect(requestHeader.Filters)).ConfigureAwait(false);
+            return anomalyResult.Document;
         }
     }
 }
