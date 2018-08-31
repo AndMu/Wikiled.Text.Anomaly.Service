@@ -117,7 +117,7 @@ namespace Wikiled.Text.Anomaly.Service
 
             var sentimentUrl = new Uri(Configuration["Services:Sentiment"]);
             builder.Register(context =>
-                new StreamApiClientFactory(context.Resolve<ILogger<StreamApiClient>>(),
+                new StreamApiClientFactory(context.Resolve<ILoggerFactory>(),
                     new HttpClient { Timeout = TimeSpan.FromMinutes(10) },
                     sentimentUrl))
                 .As<IStreamApiClientFactory>();

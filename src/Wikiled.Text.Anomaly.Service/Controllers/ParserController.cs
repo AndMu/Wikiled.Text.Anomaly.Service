@@ -30,19 +30,22 @@ namespace Wikiled.Text.Anomaly.Service.Controllers
             this.documentParser = documentParser;
         }
 
-        [Route("process")]
+        [Route("processfile")]
         [RequestSizeLimit(1024 * 1024 * 100)]
-        public async Task<AnomalyResult> Process([FromBody] AnomalyRequest request)
+        public async Task<AnomalyResult> Process([FromBody] FileAnomalyRequest request)
         {
-            if (request.Data?.Length > 0)
+            if (request.Data.Length <= 0)
             {
-                var parsingResult = await documentParser.Parse(request.Name, request.Data, CancellationToken.None).ConfigureAwait(false);
-                request.Text = parsingResult.Text;
+                throw new ArgumentOutOfRangeException(nameof(request.Data));
             }
 
-            var result = await anomalyDetection.Parse(request).ConfigureAwait(false);
-            var rating = RatingData.Accumulate(result.Sentences.Select(item => item.CalculateSentiment()));
-            return new AnomalyResult { Text = result.Text, Sentiment = rating.RawRating };
+            var parsingResult = await documentParser.Parse(request.Name, request.Data, CancellationToken.None).ConfigureAwait(false);
+            //parsingResult.Text.Pages.Select().SelectMany(item => item.Blocks).Select(item => item.Text)
+            //request.Text = parsingResult.Text;
+            var result = await anomalyDetection.Parse(request.Header, parsingResult.Document).ConfigureAwait(false);
+            //var rating = RatingData.Accumulate(result.Sentences.Select(item => item.CalculateSentiment()));
+            //return new AnomalyResult { Text = result.Text, Sentiment = rating.RawRating };
+            throw new NotImplementedException();
         }
     }
 }

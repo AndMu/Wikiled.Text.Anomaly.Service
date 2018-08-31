@@ -1,8 +1,15 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Wikiled.Common.Extensions;
+using Wikiled.Sentiment.Api.Request;
 using Wikiled.Text.Analysis.Structure;
+using Wikiled.Text.Analysis.Structure.Raw;
 using Wikiled.Text.Anomaly.Api.Data;
 using Wikiled.Text.Anomaly.Processing;
 
@@ -28,14 +35,28 @@ namespace Wikiled.Text.Anomaly.Service.Logic
             this.logger = logger.CreateLogger<AnomalyDetectionLogic>();
         }
 
-        public async Task<Document> Parse(AnomalyRequest request)
+        public async Task<Document> Parse(AnomalyRequestHeader requestHeader, RawDocument rawDocument)
         {
             logger.LogDebug("Parsing");
-            var document = await sentimentAnalysisFactory.Create(request.Domain).Measure(request.Text, CancellationToken.None).ConfigureAwait(false);
-            logger.LogDebug("Performing anomaly detection");
-            var anomaly = anomalyFactory.CreateSimple(document);
-            var result = await Task.Run(() => anomaly.Detect(request.Filters)).ConfigureAwait(false);
-            return result;
+            SingleRequestData[] requests = new SingleRequestData[rawDocument.Pages.Length];
+            for (int i = 0; i < rawDocument.Pages.Length; i++)
+            {
+                var text = rawDocument.Pages[i].Blocks.Select(x => x.Text).AccumulateItems(" ");
+                var request = new SingleRequestData();
+                request.Text = text;
+                request.Id = i.ToString();
+                requests[i] = request;
+            }
+
+            var result = await sentimentAnalysisFactory.Create(requestHeader.Domain).Measure(requests, CancellationToken.None).ToArray();
+            result = result.OrderBy(item => int.Parse(item.Id)).ToArray();
+            var textBlock = JsonConvert.SerializeObject(result, Formatting.Indented);
+            File.WriteAllText("docs.json", textBlock);
+            throw new NotImplementedException();
+            //logger.LogDebug("Performing anomaly detection");
+            //var anomaly = anomalyFactory.CreateSimple(document);
+            //var result = await Task.Run(() => anomaly.Detect(requestHeader.Filters)).ConfigureAwait(false);
+            //return result;
         }
     }
 }

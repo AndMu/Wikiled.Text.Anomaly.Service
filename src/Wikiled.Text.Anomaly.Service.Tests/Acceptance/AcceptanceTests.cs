@@ -34,14 +34,19 @@ namespace Wikiled.Text.Anomaly.Service.Tests.Acceptance
             AnomalyAnalysis analysis = new AnomalyAnalysis(new ApiClientFactory(wrapper.Client, wrapper.Client.BaseAddress));
             var data = await File.ReadAllBytesAsync(Path.Combine(TestContext.CurrentContext.TestDirectory, "Data", "Research.pdf")).ConfigureAwait(false);
             var result = await analysis.Measure(
-                             new AnomalyRequest
-                             {
-                                 Data = data,
-                                 Domain ="Market",
-                                 Name = "Market.pdf",
-                                 Filters = new []{FilterTypes.KMeans}
-                             }, 
-                             CancellationToken.None).ConfigureAwait(false);
+                new FileAnomalyRequest
+                {
+                    Data = data,
+                    Name = "Market.pdf",
+                    Header =
+                        new AnomalyRequestHeader
+                        {
+                            Domain = "Market",
+
+                            Filters = new[] {FilterTypes.KMeans}
+                        }
+                },
+                CancellationToken.None).ConfigureAwait(false);
         }
 
         [TearDown]
