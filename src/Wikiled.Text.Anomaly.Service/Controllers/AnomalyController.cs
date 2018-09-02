@@ -15,13 +15,14 @@ namespace Wikiled.Text.Anomaly.Service.Controllers
 {
     [Route("api/[controller]")]
     [TypeFilter(typeof(RequestValidationAttribute))]
-    public class ParserController : BaseController
+    public class AnomalyController : BaseController
     {
         private readonly IAnomalyDetectionLogic anomalyDetection;
 
         private readonly IDocumentParser documentParser;
 
-        public ParserController(ILoggerFactory loggerFactory,
+        public AnomalyController(
+            ILoggerFactory loggerFactory,
             IAnomalyDetectionLogic anomalyDetection,
             IDocumentParser documentParser)
             : base(loggerFactory)
@@ -32,20 +33,31 @@ namespace Wikiled.Text.Anomaly.Service.Controllers
 
         [Route("processfile")]
         [RequestSizeLimit(1024 * 1024 * 100)]
-        public async Task<AnomalyResult> Process([FromBody] FileAnomalyRequest request)
+        public async Task<ActionResult<AnomalyResult>> Process([FromBody] FileAnomalyRequest request)
         {
             if (request.Data.Length <= 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(request.Data));
+                return StatusCode(500, "No file data");
             }
 
             var parsingResult = await documentParser.Parse(request.Name, request.Data, CancellationToken.None).ConfigureAwait(false);
-            //parsingResult.Text.Pages.Select().SelectMany(item => item.Blocks).Select(item => item.Text)
-            //request.Text = parsingResult.Text;
-            var result = await anomalyDetection.Parse(request.Header, parsingResult.Document).ConfigureAwait(false);
-            //var rating = RatingData.Accumulate(result.Sentences.Select(item => item.CalculateSentiment()));
-            //return new AnomalyResult { Text = result.Text, Sentiment = rating.RawRating };
-            throw new NotImplementedException();
+            var result = await anomalyDetection.RemoveAnomaly(request.Header, parsingResult.Document).ConfigureAwait(false);
+            var rating = RatingData.Accumulate(result.Sentences.Select(item => item.CalculateSentiment()));
+            return Ok(new AnomalyResult { Document = result, Sentiment = rating.RawRating });
+        }
+
+        [Route("processtext")]
+        [RequestSizeLimit(1024 * 1024 * 100)]
+        public async Task<ActionResult<AnomalyResult>> Process([FromBody] TextAnomalyRequest request)
+        {
+            if (request.Text.Length <= 0)
+            {
+                return StatusCode(500, "No text data");
+            }
+
+            var result = await anomalyDetection.RemoveAnomaly(request.Header, request.Text).ConfigureAwait(false);
+            var rating = RatingData.Accumulate(result.Sentences.Select(item => item.CalculateSentiment()));
+            return Ok(new AnomalyResult { Document = result, Sentiment = rating.RawRating });
         }
     }
 }

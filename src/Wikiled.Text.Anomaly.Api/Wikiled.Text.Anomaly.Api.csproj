@@ -15,7 +15,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
     <PackageReference Include="Wikiled.Common.Net" Version="1.1.6" />
-    <PackageReference Include="Wikiled.Text.Anomaly" Version="1.0.25" />
+    <PackageReference Include="Wikiled.Text.Anomaly" Version="1.0.28" />
   </ItemGroup>
 
 </Project>

@@ -7,6 +7,8 @@ namespace Wikiled.Text.Anomaly.Service.Logic
 {
     public interface IAnomalyDetectionLogic
     {
-        Task<Document> Parse(AnomalyRequestHeader requestHeader, RawDocument rawDocument);
+        Task<Document> RemoveAnomaly(AnomalyRequestHeader requestHeader, RawDocument rawDocument);
+
+        Task<Document> RemoveAnomaly(AnomalyRequestHeader requestHeader, string text);
     }
 }

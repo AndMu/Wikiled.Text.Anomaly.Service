@@ -1,11 +1,9 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Wikiled.Common.Extensions;
 using Wikiled.Sentiment.Api.Request;
 using Wikiled.Text.Analysis.Structure;
@@ -36,7 +34,7 @@ namespace Wikiled.Text.Anomaly.Service.Logic
             this.logger = logger.CreateLogger<AnomalyDetectionLogic>();
         }
 
-        public async Task<Document> Parse(AnomalyRequestHeader requestHeader, RawDocument rawDocument)
+        public async Task<Document> RemoveAnomaly(AnomalyRequestHeader requestHeader, RawDocument rawDocument)
         {
             logger.LogDebug("Parsing");
             SingleRequestData[] requests = new SingleRequestData[rawDocument.Pages.Length];

@@ -21,8 +21,9 @@ using Wikiled.Text.Analysis.POS;
 using Wikiled.Text.Analysis.Word2Vec;
 using Wikiled.Text.Analysis.Words;
 using Wikiled.Text.Anomaly.Processing;
-using Wikiled.Text.Anomaly.Processing.Vectors;
 using Wikiled.Text.Anomaly.Service.Logic;
+using Wikiled.Text.Anomaly.Supervised;
+using Wikiled.Text.Anomaly.Vectors;
 using Wikiled.Text.Inquirer.Logic;
 using Wikiled.Text.Parser.Api.Service;
 using Wikiled.Text.Style.Logic;
@@ -155,11 +156,12 @@ namespace Wikiled.Text.Anomaly.Service
             builder.RegisterType<StyleFactory>().As<IStyleFactory>();
             builder.RegisterType<AnomalyFactory>().As<IAnomalyFactory>();
             builder.RegisterType<EmbeddingVectorSource>().As<IDocumentVectorSource>();
+            builder.RegisterType<SvmModelStorage>().As<IModelStorage>();
+            
             logger.LogInformation("Downloading model...");
             var model = new Uri(Configuration["Anomaly:model"]);
             new DataDownloader(loggerFactory).DownloadFile(model, "resources").Wait();
             builder.Register(context => WordModel.Load("Resources/model.bin")).SingleInstance();
         }
-
     }
 }

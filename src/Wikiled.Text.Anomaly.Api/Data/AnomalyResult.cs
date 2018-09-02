@@ -4,7 +4,7 @@ namespace Wikiled.Text.Anomaly.Api.Data
 {
     public class AnomalyResult
     {
-        public Document[] Pages { get; set; }
+        public Document Document { get; set; }
 
         public double? Sentiment { get; set; }
     }
