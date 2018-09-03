@@ -35,19 +35,22 @@ namespace Wikiled.Text.Anomaly.Service.Tests.Acceptance
             AnomalyAnalysis analysis = new AnomalyAnalysis(new ApiClientFactory(wrapper.Client, wrapper.Client.BaseAddress));
             byte[] data = await File.ReadAllBytesAsync(Path.Combine(TestContext.CurrentContext.TestDirectory, "Data", "Research.pdf")).ConfigureAwait(false);
             AnomalyResult result = await analysis.RemoveAnomaly(
-                new FileAnomalyRequest
-                {
-                    FileData = data,
-                    Name = "Market.pdf",
-                    Header =
-                        new AnomalyRequestHeader
-                        {
-                            Domain = "Market",
+                                       new FileAnomalyRequest
+                                       {
+                                           FileData = new FileData
+                                                      {
+                                                          Data = data,
+                                                          Name = "Market.pdf",
+                                                      },
+                                           Header =
+                                               new AnomalyRequestHeader
+                                               {
+                                                   Domain = "Market",
 
-                            Filters = new[] { FilterTypes.Svm }
-                        }
-                },
-                CancellationToken.None).ConfigureAwait(false);
+                                                   Filters = new[] {FilterTypes.Svm}
+                                               }
+                                       },
+                                       CancellationToken.None).ConfigureAwait(false);
             Assert.AreEqual(-0.61, Math.Round(result.Sentiment.Value, 2));
             Assert.AreEqual(13759, result.Document.TotalWords);
             Assert.AreEqual(627, result.Document.Sentences.Count);

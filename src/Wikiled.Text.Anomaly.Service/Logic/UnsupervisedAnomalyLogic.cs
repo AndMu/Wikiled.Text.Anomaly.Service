@@ -14,15 +14,15 @@ using Wikiled.Text.Anomaly.Structure;
 
 namespace Wikiled.Text.Anomaly.Service.Logic
 {
-    public class AnomalyDetectionLogic : IAnomalyDetectionLogic
+    public class UnsupervisedAnomalyLogic : IAnomalyDetection
     {
-        private readonly ILogger<AnomalyDetectionLogic> logger;
+        private readonly ILogger<UnsupervisedAnomalyLogic> logger;
 
         private readonly IAnomalyFactory anomalyFactory;
 
         private readonly ISentimentAnalysisFactory sentimentAnalysisFactory;
 
-        public AnomalyDetectionLogic(ILoggerFactory logger, IAnomalyFactory anomalyFactory, ISentimentAnalysisFactory sentimentAnalysisFactory)
+        public UnsupervisedAnomalyLogic(ILoggerFactory logger, IAnomalyFactory anomalyFactory, ISentimentAnalysisFactory sentimentAnalysisFactory)
         {
             if (logger == null)
             {
@@ -31,7 +31,7 @@ namespace Wikiled.Text.Anomaly.Service.Logic
             
             this.anomalyFactory = anomalyFactory ?? throw new ArgumentNullException(nameof(anomalyFactory));
             this.sentimentAnalysisFactory = sentimentAnalysisFactory ?? throw new ArgumentNullException(nameof(sentimentAnalysisFactory));
-            this.logger = logger.CreateLogger<AnomalyDetectionLogic>();
+            this.logger = logger.CreateLogger<UnsupervisedAnomalyLogic>();
         }
 
         public async Task<Document> RemoveAnomaly(AnomalyRequestHeader requestHeader, RawDocument rawDocument)

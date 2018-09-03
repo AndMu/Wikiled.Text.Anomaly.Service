@@ -5,7 +5,7 @@ using Wikiled.Text.Anomaly.Api.Data;
 
 namespace Wikiled.Text.Anomaly.Service.Logic
 {
-    public interface IAnomalyDetectionLogic
+    public interface IAnomalyDetection
     {
         Task<Document> RemoveAnomaly(AnomalyRequestHeader requestHeader, RawDocument rawDocument);
 

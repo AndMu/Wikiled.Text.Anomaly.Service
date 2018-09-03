@@ -101,6 +101,7 @@ namespace Wikiled.Text.Anomaly.Service
             // needed to load configuration from appsettings.json
             services.AddOptions();
             services.RegisterConfiguration<ServicesConfig>(Configuration.GetSection("documents"));
+            services.RegisterConfiguration<StorageConfig>(Configuration.GetSection("persistency"));
 
             // Create the container builder.
             var builder = new ContainerBuilder();
@@ -119,7 +120,7 @@ namespace Wikiled.Text.Anomaly.Service
         {
             builder.RegisterType<IpResolve>().As<IIpResolve>();
             builder.RegisterType<DomainSentimentAnalysisFactory>().As<ISentimentAnalysisFactory>();
-            builder.RegisterType<AnomalyDetectionLogic>().As<IAnomalyDetectionLogic>();
+            builder.RegisterType<UnsupervisedAnomalyLogic>().As<IAnomalyDetection>();
         }
 
         private void SetupServices(ContainerBuilder builder)
@@ -156,12 +157,13 @@ namespace Wikiled.Text.Anomaly.Service
             builder.RegisterType<StyleFactory>().As<IStyleFactory>();
             builder.RegisterType<AnomalyFactory>().As<IAnomalyFactory>();
             builder.RegisterType<EmbeddingVectorSource>().As<IDocumentVectorSource>();
-            builder.RegisterType<SvmModelStorage>().As<IModelStorage>();
-            
+            builder.RegisterType<SvmModelStorageFactory>().As<IModelStorageFactory>();
+
             logger.LogInformation("Downloading model...");
             var model = new Uri(Configuration["Anomaly:model"]);
             new DataDownloader(loggerFactory).DownloadFile(model, "resources").Wait();
             builder.Register(context => WordModel.Load("Resources/model.bin")).SingleInstance();
+            
         }
     }
 }

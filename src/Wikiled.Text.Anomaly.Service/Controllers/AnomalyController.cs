@@ -17,13 +17,13 @@ namespace Wikiled.Text.Anomaly.Service.Controllers
     [TypeFilter(typeof(RequestValidationAttribute))]
     public class AnomalyController : BaseController
     {
-        private readonly IAnomalyDetectionLogic anomalyDetection;
+        private readonly IAnomalyDetection anomalyDetection;
 
         private readonly IDocumentParser documentParser;
 
         public AnomalyController(
             ILoggerFactory loggerFactory,
-            IAnomalyDetectionLogic anomalyDetection,
+            IAnomalyDetection anomalyDetection,
             IDocumentParser documentParser)
             : base(loggerFactory)
         {
