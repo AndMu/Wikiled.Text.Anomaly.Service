@@ -8,6 +8,6 @@ namespace Wikiled.Text.Anomaly.Api.Data
         public AnomalyRequestHeader Header { get; set; }
 
         [Required]
-        public FileData Data { get; set; }
+        public FileData FileData { get; set; }
     }
 }

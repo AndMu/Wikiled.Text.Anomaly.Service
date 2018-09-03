@@ -35,12 +35,12 @@ namespace Wikiled.Text.Anomaly.Service.Controllers
         [RequestSizeLimit(1024 * 1024 * 100)]
         public async Task<ActionResult<AnomalyResult>> Process([FromBody] FileAnomalyRequest request)
         {
-            if (request.Data.Length <= 0)
+            if (request.FileData.Data.Length <= 0)
             {
                 return StatusCode(500, "No file data");
             }
 
-            var parsingResult = await documentParser.Parse(request.Name, request.Data, CancellationToken.None).ConfigureAwait(false);
+            var parsingResult = await documentParser.Parse(request.FileData.Name, request.FileData.Data, CancellationToken.None).ConfigureAwait(false);
             var result = await anomalyDetection.RemoveAnomaly(request.Header, parsingResult.Document).ConfigureAwait(false);
             var rating = RatingData.Accumulate(result.Sentences.Select(item => item.CalculateSentiment()));
             return Ok(new AnomalyResult { Document = result, Sentiment = rating.RawRating });

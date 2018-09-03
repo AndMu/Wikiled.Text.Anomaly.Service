@@ -37,7 +37,7 @@ namespace Wikiled.Text.Anomaly.Service.Tests.Acceptance
             AnomalyResult result = await analysis.RemoveAnomaly(
                 new FileAnomalyRequest
                 {
-                    Data = data,
+                    FileData = data,
                     Name = "Market.pdf",
                     Header =
                         new AnomalyRequestHeader

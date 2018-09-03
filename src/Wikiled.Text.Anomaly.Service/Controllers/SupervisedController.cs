@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Wikiled.MachineLearning.Mathematics;
 using Wikiled.Server.Core.ActionFilters;
 using Wikiled.Server.Core.Controllers;
 using Wikiled.Text.Anomaly.Api.Data;
@@ -28,6 +26,16 @@ namespace Wikiled.Text.Anomaly.Service.Controllers
         {
             this.anomalyDetection = anomalyDetection ?? throw new ArgumentNullException(nameof(anomalyDetection));
             this.documentParser = documentParser;
+        }
+
+        public Task Add(TrainingData trainingData)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Train(string name)
+        {
+            throw new NotImplementedException();
         }
     }
 }

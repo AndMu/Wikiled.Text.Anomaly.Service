@@ -9,5 +9,7 @@ namespace Wikiled.Text.Anomaly.Api.Data
         public FilterTypes[] Filters { get; set; }
 
         public string Domain { get; set; }
+
+        public string Name { get; set; }
     }
 }

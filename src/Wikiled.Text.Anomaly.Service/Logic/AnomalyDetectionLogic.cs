@@ -54,5 +54,10 @@ namespace Wikiled.Text.Anomaly.Service.Logic
             var anomalyResult = await Task.Run(() => anomaly.Detect(requestHeader.Filters)).ConfigureAwait(false);
             return anomalyResult.Document;
         }
+
+        public Task<Document> RemoveAnomaly(AnomalyRequestHeader requestHeader, string text)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
