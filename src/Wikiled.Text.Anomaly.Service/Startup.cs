@@ -21,6 +21,7 @@ using Wikiled.Text.Analysis.POS;
 using Wikiled.Text.Analysis.Word2Vec;
 using Wikiled.Text.Analysis.Words;
 using Wikiled.Text.Anomaly.Processing;
+using Wikiled.Text.Anomaly.Service.Config;
 using Wikiled.Text.Anomaly.Service.Logic;
 using Wikiled.Text.Anomaly.Supervised;
 using Wikiled.Text.Anomaly.Vectors;
@@ -120,7 +121,7 @@ namespace Wikiled.Text.Anomaly.Service
         {
             builder.RegisterType<IpResolve>().As<IIpResolve>();
             builder.RegisterType<DomainSentimentAnalysisFactory>().As<ISentimentAnalysisFactory>();
-            builder.RegisterType<UnsupervisedAnomalyLogic>().As<IAnomalyDetection>();
+            builder.RegisterType<UnsupervisedAnomaly>().As<IAnomalyDetection>();
         }
 
         private void SetupServices(ContainerBuilder builder)

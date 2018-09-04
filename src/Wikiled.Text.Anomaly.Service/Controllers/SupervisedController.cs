@@ -28,14 +28,15 @@ namespace Wikiled.Text.Anomaly.Service.Controllers
             this.documentParser = documentParser;
         }
 
-        public Task Add(TrainingData trainingData)
+        public ActionResult Add(TrainingData trainingData)
         {
-            throw new NotImplementedException();
+            anomalyDetection.Add(trainingData);
+            return Ok();
         }
-
+         
         public Task Train(string name)
         {
-            throw new NotImplementedException();
+            return anomalyDetection.Train(name);
         }
     }
 }

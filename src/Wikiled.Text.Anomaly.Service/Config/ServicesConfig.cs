@@ -1,4 +1,4 @@
-﻿namespace Wikiled.Text.Anomaly.Service.Logic
+﻿namespace Wikiled.Text.Anomaly.Service.Config
 {
     public class ServicesConfig
     {
