@@ -101,8 +101,8 @@ namespace Wikiled.Text.Anomaly.Service
 
             // needed to load configuration from appsettings.json
             services.AddOptions();
-            services.RegisterConfiguration<ServicesConfig>(Configuration.GetSection("documents"));
-            services.RegisterConfiguration<StorageConfig>(Configuration.GetSection("persistency"));
+            services.RegisterConfiguration<ServicesConfig>(Configuration.GetSection("Services"));
+            services.RegisterConfiguration<StorageConfig>(Configuration.GetSection("Persistency"));
 
             // Create the container builder.
             var builder = new ContainerBuilder();
@@ -157,6 +157,10 @@ namespace Wikiled.Text.Anomaly.Service
             builder.RegisterType<FrequencyListManager>().As<IFrequencyListManager>().SingleInstance();
             builder.RegisterType<StyleFactory>().As<IStyleFactory>();
             builder.RegisterType<AnomalyFactory>().As<IAnomalyFactory>();
+            builder.RegisterType<SupervisedAnomaly>().As<ISupervisedAnomaly>();
+            builder.RegisterType<DocumentReconstructor>().As<IDocumentReconstructor>();
+            builder.RegisterType<DocumentExtractor>().As<IDocumentExtractor>();
+            
             builder.RegisterType<EmbeddingVectorSource>().As<IDocumentVectorSource>();
             builder.RegisterType<SvmModelStorageFactory>().As<IModelStorageFactory>();
 

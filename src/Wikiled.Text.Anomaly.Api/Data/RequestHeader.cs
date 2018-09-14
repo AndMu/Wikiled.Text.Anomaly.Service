@@ -3,10 +3,9 @@ using Wikiled.Text.Anomaly.Processing.Filters;
 
 namespace Wikiled.Text.Anomaly.Api.Data
 {
-    public class AnomalyRequestHeader
+    public class RequestHeader
     {
-        [Required]
-        public FilterTypes[] Filters { get; set; }
+        public FilterTypes[] AnomalyFilters { get; set; }
 
         public string Domain { get; set; }
 

@@ -12,7 +12,7 @@ using Wikiled.Text.Anomaly.Processing.Filters;
 namespace Wikiled.Text.Anomaly.Service.Tests.Acceptance
 {
     [TestFixture]
-    public class AcceptanceTests
+    public class UnusupervisedTests
     {
         private ServerWrapper wrapper;
 
@@ -25,7 +25,7 @@ namespace Wikiled.Text.Anomaly.Service.Tests.Acceptance
         [Test]
         public async Task Version()
         {
-            ServiceResponse<RawResponse<string>> response = await wrapper.ApiClient.GetRequest<RawResponse<string>>("api/parser/version", CancellationToken.None).ConfigureAwait(false);
+            ServiceResponse<RawResponse<string>> response = await wrapper.ApiClient.GetRequest<RawResponse<string>>("api/anomaly/version", CancellationToken.None).ConfigureAwait(false);
             Assert.IsTrue(response.IsSuccess);
         }
 
@@ -35,7 +35,7 @@ namespace Wikiled.Text.Anomaly.Service.Tests.Acceptance
             AnomalyAnalysis analysis = new AnomalyAnalysis(new ApiClientFactory(wrapper.Client, wrapper.Client.BaseAddress));
             byte[] data = await File.ReadAllBytesAsync(Path.Combine(TestContext.CurrentContext.TestDirectory, "Data", "Research.pdf")).ConfigureAwait(false);
             AnomalyResult result = await analysis.RemoveAnomaly(
-                                       new FileAnomalyRequest
+                                       new FileRequest
                                        {
                                            FileData = new FileData
                                                       {
@@ -43,11 +43,11 @@ namespace Wikiled.Text.Anomaly.Service.Tests.Acceptance
                                                           Name = "Market.pdf",
                                                       },
                                            Header =
-                                               new AnomalyRequestHeader
+                                               new RequestHeader
                                                {
                                                    Domain = "Market",
 
-                                                   Filters = new[] {FilterTypes.Svm}
+                                                   AnomalyFilters = new[] {FilterTypes.Svm}
                                                }
                                        },
                                        CancellationToken.None).ConfigureAwait(false);

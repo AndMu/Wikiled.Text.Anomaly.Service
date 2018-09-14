@@ -2,12 +2,12 @@
 
 namespace Wikiled.Text.Anomaly.Api.Data
 {
-    public class FileAnomalyRequest
+    public class TextRequest
     {
         [Required]
-        public AnomalyRequestHeader Header { get; set; }
+        public RequestHeader Header { get; set; }
 
         [Required]
-        public FileData FileData { get; set; }
+        public string Text { get; set; }
     }
 }

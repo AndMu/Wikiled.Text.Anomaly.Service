@@ -6,8 +6,8 @@ namespace Wikiled.Text.Anomaly.Api.Service
 {
     public interface IAnomalyAnalysis
     {
-        Task<AnomalyResult> RemoveAnomaly(TextAnomalyRequest requestHeader, CancellationToken token);
+        Task<AnomalyResult> RemoveAnomaly(TextRequest requestHeader, CancellationToken token);
 
-        Task<AnomalyResult> RemoveAnomaly(FileAnomalyRequest request, CancellationToken token);
+        Task<AnomalyResult> RemoveAnomaly(FileRequest request, CancellationToken token);
     }
 }

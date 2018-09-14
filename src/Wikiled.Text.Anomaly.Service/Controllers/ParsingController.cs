@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Linq;
+using System.Reflection.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -15,29 +15,22 @@ namespace Wikiled.Text.Anomaly.Service.Controllers
 {
     [Route("api/[controller]")]
     [TypeFilter(typeof(RequestValidationAttribute))]
-    public class AnomalyController : BaseController
+    public class ParsingController : BaseController
     {
-        private readonly IAnomalyDetection anomalyDetection;
+        private readonly IDocumentExtractor extractor;
 
         private readonly IDocumentParser documentParser;
 
-        private readonly IDocumentExtractor extractor;
-
-        public AnomalyController(
-            ILoggerFactory loggerFactory,
-            IAnomalyDetection anomalyDetection,
-            IDocumentParser documentParser,
-            IDocumentExtractor extractor)
+        public ParsingController(ILoggerFactory loggerFactory, IDocumentExtractor extractor, IDocumentParser documentParser)
             : base(loggerFactory)
         {
-            this.anomalyDetection = anomalyDetection ?? throw new ArgumentNullException(nameof(anomalyDetection));
-            this.documentParser = documentParser ?? throw new ArgumentNullException(nameof(documentParser));
             this.extractor = extractor ?? throw new ArgumentNullException(nameof(extractor));
+            this.documentParser = documentParser ?? throw new ArgumentNullException(nameof(documentParser));
         }
 
         [Route("processfile")]
         [RequestSizeLimit(1024 * 1024 * 100)]
-        public async Task<ActionResult<AnomalyResult>> Process([FromBody] FileRequest request)
+        public async Task<ActionResult<Document[]>> Process([FromBody] FileRequest request)
         {
             if (request.FileData.Data.Length <= 0)
             {
@@ -46,14 +39,12 @@ namespace Wikiled.Text.Anomaly.Service.Controllers
 
             var parsingResult = await documentParser.Parse(request.FileData.Name, request.FileData.Data, CancellationToken.None).ConfigureAwait(false);
             var documents = await extractor.Extract(request.Header.Domain, parsingResult.Document).ConfigureAwait(false);
-            var result = await anomalyDetection.RemoveAnomaly(request.Header, documents).ConfigureAwait(false);
-            var rating = RatingData.Accumulate(result.Sentences.Select(item => item.CalculateSentiment()));
-            return Ok(new AnomalyResult { Document = result, Sentiment = rating.RawRating });
+            return Ok(documents);
         }
 
         [Route("processtext")]
         [RequestSizeLimit(1024 * 1024 * 100)]
-        public async Task<ActionResult<AnomalyResult>> Process([FromBody] TextRequest request)
+        public async Task<ActionResult<Document[]>> Process([FromBody] TextRequest request)
         {
             if (request.Text.Length <= 0)
             {
@@ -61,9 +52,7 @@ namespace Wikiled.Text.Anomaly.Service.Controllers
             }
 
             var documents = await extractor.Extract(request.Header.Domain, request.Text).ConfigureAwait(false);
-            var result = await anomalyDetection.RemoveAnomaly(request.Header, documents).ConfigureAwait(false);
-            var rating = RatingData.Accumulate(result.Sentences.Select(item => item.CalculateSentiment()));
-            return Ok(new AnomalyResult { Document = result, Sentiment = rating.RawRating });
+            return Ok(documents);
         }
     }
 }

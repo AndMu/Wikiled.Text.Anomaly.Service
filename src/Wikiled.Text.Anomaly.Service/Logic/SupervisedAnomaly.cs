@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Wikiled.Text.Analysis.Structure;
-using Wikiled.Text.Analysis.Structure.Raw;
 using Wikiled.Text.Anomaly.Api.Data;
 using Wikiled.Text.Anomaly.Structure;
 using Wikiled.Text.Anomaly.Supervised;
@@ -17,16 +16,6 @@ namespace Wikiled.Text.Anomaly.Service.Logic
         public SupervisedAnomaly(IModelStorageFactory modelStorageFactory)
         {
             this.modelStorageFactory = modelStorageFactory ?? throw new ArgumentNullException(nameof(modelStorageFactory));
-        }
-
-        public Task<Document> RemoveAnomaly(AnomalyRequestHeader requestHeader, RawDocument rawDocument)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task<Document> RemoveAnomaly(AnomalyRequestHeader requestHeader, string text)
-        {
-            throw new System.NotImplementedException();
         }
 
         public void Add(TrainingData trainingData)
@@ -44,7 +33,7 @@ namespace Wikiled.Text.Anomaly.Service.Logic
 
             if (trainingData.Negative?.Length > 0)
             {
-                model.Add(DataType.Positive, trainingData.Negative.Select(item => new ProcessingTextBlock(item.Sentences.ToArray())).ToArray());
+                model.Add(DataType.Negative, trainingData.Negative.Select(item => new ProcessingTextBlock(item.Sentences.ToArray())).ToArray());
             }
 
             modelStorageFactory.Save(trainingData.Name, model);
@@ -57,7 +46,19 @@ namespace Wikiled.Text.Anomaly.Service.Logic
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(name));
             }
 
-            await modelStorageFactory.Construct(name).Train(CancellationToken.None).ConfigureAwait(false);
+            var model = modelStorageFactory.Construct(name);
+            await model.Train(CancellationToken.None).ConfigureAwait(false);
+            modelStorageFactory.Save(name, model);
+        }
+
+        public Document[] Resolve(string name, Document[] documents)
+        {
+            throw new NotImplementedException();
+        }
+
+        public SentenceItem[] Resolve(string name, Document document)
+        {
+            throw new NotImplementedException();
         }
     }
 }

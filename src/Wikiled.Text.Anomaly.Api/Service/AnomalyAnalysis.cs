@@ -16,14 +16,14 @@ namespace Wikiled.Text.Anomaly.Api.Service
             client = factory.GetClient();
         }
 
-        public Task<AnomalyResult> RemoveAnomaly(TextAnomalyRequest requestHeader, CancellationToken token)
+        public Task<AnomalyResult> RemoveAnomaly(TextRequest requestHeader, CancellationToken token)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<AnomalyResult> RemoveAnomaly(FileAnomalyRequest request, CancellationToken token)
+        public async Task<AnomalyResult> RemoveAnomaly(FileRequest request, CancellationToken token)
         {
-            var result = await client.PostRequest<FileAnomalyRequest, RawResponse<AnomalyResult>>("api/parser/processfile", request, token).ConfigureAwait(false);
+            var result = await client.PostRequest<FileRequest, RawResponse<AnomalyResult>>("api/anomaly/processfile", request, token).ConfigureAwait(false);
             if (!result.IsSuccess)
             {
                 throw new ApplicationException("Failed to retrieve:" + result.HttpResponseMessage);

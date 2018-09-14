@@ -1,12 +1,13 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
 using Wikiled.Server.Core.ActionFilters;
 using Wikiled.Server.Core.Controllers;
+using Wikiled.Text.Analysis.Structure;
 using Wikiled.Text.Anomaly.Api.Data;
+using Wikiled.Text.Anomaly.Service.Data;
 using Wikiled.Text.Anomaly.Service.Logic;
-using Wikiled.Text.Parser.Api.Service;
 
 namespace Wikiled.Text.Anomaly.Service.Controllers
 {
@@ -16,27 +17,38 @@ namespace Wikiled.Text.Anomaly.Service.Controllers
     {
         private readonly ISupervisedAnomaly anomalyDetection;
 
-        private readonly IDocumentParser documentParser;
-
-        public SupervisedController(
-            ILoggerFactory loggerFactory,
-            ISupervisedAnomaly anomalyDetection,
-            IDocumentParser documentParser)
+        public SupervisedController(ILoggerFactory loggerFactory, ISupervisedAnomaly anomalyDetection)
             : base(loggerFactory)
         {
             this.anomalyDetection = anomalyDetection ?? throw new ArgumentNullException(nameof(anomalyDetection));
-            this.documentParser = documentParser;
         }
 
-        public ActionResult Add(TrainingData trainingData)
+        [HttpPost("add")]
+        public ActionResult Add([FromBody] TrainingData trainingData)
         {
             anomalyDetection.Add(trainingData);
-            return Ok();
+            return Ok("Added");
         }
-         
-        public Task Train(string name)
+
+        [HttpGet("train/{name}")]
+        public async Task<ActionResult> Train(string name)
         {
-            return anomalyDetection.Train(name);
+            await anomalyDetection.Train(name).ConfigureAwait(false);
+            return Ok("Trained");
+        }
+
+        [HttpPost("test/documents/{name}")]
+        public ActionResult<Document[]> Resolve(DocumentsAnomaly request)
+        {
+            var result = anomalyDetection.Resolve(request.Name, request.Documents);
+            return Ok(result);
+        }
+
+        [HttpPost("test/sentences/{name}")]
+        public ActionResult<SentenceItem[]> Resolve(DocumentAnomaly request)
+        {
+            var result = anomalyDetection.Resolve(request.Name, request.Document);
+            return Ok(result);
         }
     }
 }
