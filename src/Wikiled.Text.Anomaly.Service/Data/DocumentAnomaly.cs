@@ -6,7 +6,7 @@ namespace Wikiled.Text.Anomaly.Service.Data
 {
     public class DocumentAnomaly
     {
-        [FromQuery]
+        [FromRoute]
         [Required]
         public string Name { get; set; }
 

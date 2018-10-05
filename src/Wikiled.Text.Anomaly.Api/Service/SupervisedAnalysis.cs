@@ -17,9 +17,9 @@ namespace Wikiled.Text.Anomaly.Api.Service
             client = factory.GetClient();
         }
 
-        public async Task Add(TrainingData trainingData, CancellationToken token)
+        public async Task Add(DocumentAnomalyData anomalyData, CancellationToken token)
         {
-            var result = await client.PostRequest<TrainingData, RawResponse<string>>("api/supervised/add", trainingData, token).ConfigureAwait(false);
+            var result = await client.PostRequest<DocumentAnomalyData, RawResponse<string>>("api/supervised/add", anomalyData, token).ConfigureAwait(false);
             if (!result.IsSuccess)
             {
                 throw new ApplicationException("Failed to add training data:" + result.HttpResponseMessage);
@@ -35,26 +35,33 @@ namespace Wikiled.Text.Anomaly.Api.Service
             }
         }
 
-        public async Task<Document[]> Resolve(string name, Document[] documents, CancellationToken token)
+        public Task Reset(string name, CancellationToken token)
         {
-            var result = await client.PostRequest<Document[], RawResponse<Document[]>>($"api/supervised/test/documents/{name}", documents, token).ConfigureAwait(false);
+            var result = await client.GetRequest<RawResponse<string>>($"api/supervised/reset/{name}", token).ConfigureAwait(false);
             if (!result.IsSuccess)
             {
-                throw new ApplicationException("Failed to add training data:" + result.HttpResponseMessage);
+                throw new ApplicationException("Failed to train model:" + result.HttpResponseMessage);
             }
-
-            return result.Result.Value;
         }
 
-        public async Task<SentenceItem[]> Resolve(string name, Document document, CancellationToken token)
+        public Task<DocumentAnomalyData> Resolve(string name, Document[] documents, CancellationToken token)
         {
-            var result = await client.PostRequest<Document, RawResponse<SentenceItem[]>>($"api/supervised/test/sentences/{name}", document, token).ConfigureAwait(false);
-            if (!result.IsSuccess)
-            {
-                throw new ApplicationException("Failed to add training data:" + result.HttpResponseMessage);
-            }
+            return client
+                .PostRequest<Document[], RawResponse<DocumentAnomalyData>>(
+                    $"api/supervised/test/documents/{name}",
+                    documents,
+                    token)
+                .ProcessResult();
+        }
 
-            return result.Result.Value;
+        public Task<SentenceAnomalyData> Resolve(string name, Document document, CancellationToken token)
+        {
+            return client
+                .PostRequest<Document, RawResponse<SentenceAnomalyData>>(
+                    $"api/supervised/test/sentences/{name}",
+                    document,
+                    token)
+                .ProcessResult();
         }
     }
 }

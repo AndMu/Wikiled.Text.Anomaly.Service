@@ -4,7 +4,6 @@ using System;
 using System.Threading.Tasks;
 using Wikiled.Server.Core.ActionFilters;
 using Wikiled.Server.Core.Controllers;
-using Wikiled.Text.Analysis.Structure;
 using Wikiled.Text.Anomaly.Api.Data;
 using Wikiled.Text.Anomaly.Service.Data;
 using Wikiled.Text.Anomaly.Service.Logic;
@@ -24,10 +23,17 @@ namespace Wikiled.Text.Anomaly.Service.Controllers
         }
 
         [HttpPost("add")]
-        public ActionResult Add([FromBody] TrainingData trainingData)
+        public ActionResult Add([FromBody] DocumentAnomalyData anomalyData)
         {
-            anomalyDetection.Add(trainingData);
+            anomalyDetection.Add(anomalyData);
             return Ok("Added");
+        }
+
+        [HttpGet("reset/{name}")]
+        public ActionResult Reset(string name)
+        {
+            anomalyDetection.Reset(name);
+            return Ok("Reset");
         }
 
         [HttpGet("train/{name}")]
@@ -38,14 +44,14 @@ namespace Wikiled.Text.Anomaly.Service.Controllers
         }
 
         [HttpPost("test/documents/{name}")]
-        public ActionResult<Document[]> Resolve(DocumentsAnomaly request)
+        public ActionResult<DocumentAnomalyData> Resolve(DocumentsAnomaly request)
         {
             var result = anomalyDetection.Resolve(request.Name, request.Documents);
             return Ok(result);
         }
 
         [HttpPost("test/sentences/{name}")]
-        public ActionResult<SentenceItem[]> Resolve(DocumentAnomaly request)
+        public ActionResult<SentenceAnomalyData> Resolve(DocumentAnomaly request)
         {
             var result = anomalyDetection.Resolve(request.Name, request.Document);
             return Ok(result);

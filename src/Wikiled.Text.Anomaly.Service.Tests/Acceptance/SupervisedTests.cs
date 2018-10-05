@@ -1,12 +1,11 @@
+using System;
 using NUnit.Framework;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Wikiled.Common.Net.Client;
 using Wikiled.Server.Core.Testing.Server;
-using Wikiled.Text.Analysis.Structure;
 using Wikiled.Text.Anomaly.Api.Data;
 using Wikiled.Text.Anomaly.Api.Service;
 
@@ -31,7 +30,7 @@ namespace Wikiled.Text.Anomaly.Service.Tests.Acceptance
         }
 
         [Test]
-        public async Task Analysis()
+        public async Task AnalysisDocuments()
         {
             DocumentParsing parsing = new DocumentParsing(new ApiClientFactory(wrapper.Client, wrapper.Client.BaseAddress));
             byte[] data = await File.ReadAllBytesAsync(Path.Combine(TestContext.CurrentContext.TestDirectory, "Data", "Research.pdf")).ConfigureAwait(false);
@@ -52,14 +51,23 @@ namespace Wikiled.Text.Anomaly.Service.Tests.Acceptance
                 CancellationToken.None).ConfigureAwait(false);
 
             var analysis = new SupervisedAnalysis(new ApiClientFactory(wrapper.Client, wrapper.Client.BaseAddress));
-            TrainingData trainingData = new TrainingData();
-            trainingData.Name = "Test";
-            trainingData.Negative = result.Take(2).Concat(result.Skip(30)).ToArray();
-            trainingData.Positive = result.Skip(2).Take(29).ToArray();
-            await analysis.Add(trainingData, CancellationToken.None).ConfigureAwait(false);
+            DocumentAnomalyData anomalyData = new DocumentAnomalyData();
+            anomalyData.Name = "Test";
+            anomalyData.Negative = result.Take(2).Concat(result.Skip(30)).ToArray();
+            anomalyData.Positive = result.Skip(2).Take(29).ToArray();
+            await analysis.Reset("Test", CancellationToken.None).ConfigureAwait(false);
+            await analysis.Add(anomalyData, CancellationToken.None).ConfigureAwait(false);
             await analysis.Train("Test", CancellationToken.None).ConfigureAwait(false);
 
-            var removed = await analysis.Resolve("Test", result, CancellationToken.None).ConfigureAwait(false);
+            Assert.ThrowsAsync<ApplicationException>(async () => await analysis.Resolve("xxx", result, CancellationToken.None).ConfigureAwait(false));
+            Assert.ThrowsAsync<ApplicationException>(async () => await analysis.Resolve("xxx", result[0], CancellationToken.None).ConfigureAwait(false));
+            var anomaly = await analysis.Resolve("Test", result, CancellationToken.None).ConfigureAwait(false);
+            Assert.AreEqual(31, anomaly.Positive.Length);
+            Assert.AreEqual(4, anomaly.Negative.Length);
+
+            var sentence = await analysis.Resolve("Test", result[3], CancellationToken.None).ConfigureAwait(false);
+            Assert.AreEqual(31, anomaly.Positive.Length);
+            Assert.AreEqual(4, anomaly.Negative.Length);
         }
 
         [TearDown]

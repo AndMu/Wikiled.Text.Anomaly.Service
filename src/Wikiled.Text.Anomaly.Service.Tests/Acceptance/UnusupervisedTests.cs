@@ -51,9 +51,9 @@ namespace Wikiled.Text.Anomaly.Service.Tests.Acceptance
                                                }
                                        },
                                        CancellationToken.None).ConfigureAwait(false);
-            Assert.AreEqual(-0.61, Math.Round(result.Sentiment.Value, 2));
-            Assert.AreEqual(13759, result.Document.TotalWords);
-            Assert.AreEqual(627, result.Document.Sentences.Count);
+            Assert.AreEqual(-0.49, Math.Round(result.Sentiment.Value, 2));
+            Assert.AreEqual(13617, result.Document.TotalWords);
+            Assert.AreEqual(614, result.Document.Sentences.Count);
         }
 
         [TearDown]

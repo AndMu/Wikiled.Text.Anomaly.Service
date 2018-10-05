@@ -7,12 +7,14 @@ namespace Wikiled.Text.Anomaly.Api.Service
 {
     public interface ISupervisedAnalysis
     {
-        Task Add(TrainingData trainingData, CancellationToken token);
+        Task Add(DocumentAnomalyData anomalyData, CancellationToken token);
 
         Task Train(string name, CancellationToken token);
 
-        Task<Document[]> Resolve(string name, Document[] documents, CancellationToken token);
+        Task Reset(string name, CancellationToken token);
 
-        Task<SentenceItem[]> Resolve(string name, Document document, CancellationToken token);
+        Task<DocumentAnomalyData> Resolve(string name, Document[] documents, CancellationToken token);
+
+        Task<SentenceAnomalyData> Resolve(string name, Document document, CancellationToken token);
     }
 }

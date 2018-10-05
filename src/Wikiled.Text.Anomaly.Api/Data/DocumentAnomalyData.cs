@@ -3,7 +3,7 @@ using Wikiled.Text.Analysis.Structure;
 
 namespace Wikiled.Text.Anomaly.Api.Data
 {
-    public class TrainingData
+    public class DocumentAnomalyData
     {
         [Required]
         public string Name { get; set; }

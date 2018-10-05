@@ -6,12 +6,14 @@ namespace Wikiled.Text.Anomaly.Service.Logic
 {
     public interface ISupervisedAnomaly
     {
-        void Add(TrainingData trainingData);
+        void Add(DocumentAnomalyData anomalyData);
 
         Task Train(string name);
 
-        Document[] Resolve(string name, Document[] documents);
+        void Reset(string name);
 
-        SentenceItem[] Resolve(string name, Document document);
+        DocumentAnomalyData Resolve(string name, Document[] documents);
+
+        SentenceAnomalyData Resolve(string name, Document document);
     }
 }

@@ -168,7 +168,6 @@ namespace Wikiled.Text.Anomaly.Service
             var model = new Uri(Configuration["Anomaly:model"]);
             new DataDownloader(loggerFactory).DownloadFile(model, "resources").Wait();
             builder.Register(context => WordModel.Load("Resources/model.bin")).SingleInstance();
-            
         }
     }
 }
