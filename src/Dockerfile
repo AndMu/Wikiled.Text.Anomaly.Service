@@ -1,4 +1,4 @@
-FROM microsoft/latest AS builder
+FROM microsoft/dotnet:latest AS builder
 ARG BUILD_VERSION  
 WORKDIR /source
 
