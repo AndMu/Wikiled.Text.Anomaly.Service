@@ -11,5 +11,5 @@ WORKDIR /app
 COPY --from=builder /app .
 ENV ASPNETCORE_ENVIRONMENT Production
 
-ENTRYPOINT ["dotnet", "Wikiled.Text.Parser.Service.dll"]
+ENTRYPOINT ["dotnet", "Wikiled.Text.Anomaly.Service.dll"]
 
