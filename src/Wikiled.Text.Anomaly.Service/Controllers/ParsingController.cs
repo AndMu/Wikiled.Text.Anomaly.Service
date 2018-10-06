@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Wikiled.MachineLearning.Mathematics;
 using Wikiled.Server.Core.ActionFilters;
 using Wikiled.Server.Core.Controllers;
 using Wikiled.Text.Anomaly.Api.Data;

@@ -1,4 +1,3 @@
-using System;
 using NUnit.Framework;
 using System.IO;
 using System.Linq;
@@ -59,15 +58,15 @@ namespace Wikiled.Text.Anomaly.Service.Tests.Acceptance
             await analysis.Add(anomalyData, CancellationToken.None).ConfigureAwait(false);
             await analysis.Train("Test", CancellationToken.None).ConfigureAwait(false);
 
-            Assert.ThrowsAsync<ApplicationException>(async () => await analysis.Resolve("xxx", result, CancellationToken.None).ConfigureAwait(false));
-            Assert.ThrowsAsync<ApplicationException>(async () => await analysis.Resolve("xxx", result[0], CancellationToken.None).ConfigureAwait(false));
+            Assert.ThrowsAsync<ServiceException>(async () => await analysis.Resolve("xxx", result, CancellationToken.None).ConfigureAwait(false));
+            Assert.ThrowsAsync<ServiceException>(async () => await analysis.Resolve("xxx", result[0], CancellationToken.None).ConfigureAwait(false));
             var anomaly = await analysis.Resolve("Test", result, CancellationToken.None).ConfigureAwait(false);
             Assert.AreEqual(31, anomaly.Positive.Length);
             Assert.AreEqual(4, anomaly.Negative.Length);
 
             var sentence = await analysis.Resolve("Test", result[3], CancellationToken.None).ConfigureAwait(false);
-            Assert.AreEqual(31, anomaly.Positive.Length);
-            Assert.AreEqual(4, anomaly.Negative.Length);
+            Assert.AreEqual(16, sentence.Positive.Length);
+            Assert.AreEqual(5, sentence.Negative.Length);
         }
 
         [TearDown]

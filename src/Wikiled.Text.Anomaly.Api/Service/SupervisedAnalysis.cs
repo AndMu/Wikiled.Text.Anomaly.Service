@@ -17,31 +17,19 @@ namespace Wikiled.Text.Anomaly.Api.Service
             client = factory.GetClient();
         }
 
-        public async Task Add(DocumentAnomalyData anomalyData, CancellationToken token)
+        public Task Add(DocumentAnomalyData anomalyData, CancellationToken token)
         {
-            var result = await client.PostRequest<DocumentAnomalyData, RawResponse<string>>("api/supervised/add", anomalyData, token).ConfigureAwait(false);
-            if (!result.IsSuccess)
-            {
-                throw new ApplicationException("Failed to add training data:" + result.HttpResponseMessage);
-            }
+            return client.PostRequest<DocumentAnomalyData, RawResponse<string>>("api/supervised/add", anomalyData, token).ProcessResult();
         }
 
-        public async Task Train(string name, CancellationToken token)
+        public Task Train(string name, CancellationToken token)
         {
-            var result = await client.GetRequest<RawResponse<string>>($"api/supervised/train/{name}", token).ConfigureAwait(false);
-            if (!result.IsSuccess)
-            {
-                throw new ApplicationException("Failed to train model:" + result.HttpResponseMessage);
-            }
+            return client.GetRequest<RawResponse<string>>($"api/supervised/train/{name}", token).ProcessResult();
         }
 
         public Task Reset(string name, CancellationToken token)
         {
-            var result = await client.GetRequest<RawResponse<string>>($"api/supervised/reset/{name}", token).ConfigureAwait(false);
-            if (!result.IsSuccess)
-            {
-                throw new ApplicationException("Failed to train model:" + result.HttpResponseMessage);
-            }
+            return client.GetRequest<RawResponse<string>>($"api/supervised/reset/{name}", token).ProcessResult();
         }
 
         public Task<DocumentAnomalyData> Resolve(string name, Document[] documents, CancellationToken token)
